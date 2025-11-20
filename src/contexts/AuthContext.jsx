@@ -64,27 +64,38 @@ const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (username, password) => {
-    let users = JSON.parse(localStorage.getItem('users') || '[]');
-    let foundUser = users.find(u => u.username === username && u.password === password);
-    
-    if (foundUser) {
-      if (foundUser.onLeave && foundUser.substitute) {
-        const substituteUser = users.find(u => u.id === foundUser.substitute);
-        if (substituteUser) {
-          const effectiveUser = { ...substituteUser, originalUser: foundUser.name, canInputIncoming: foundUser.canInputIncoming, canInputOutgoing: foundUser.canInputOutgoing };
-          setUser(effectiveUser);
-          localStorage.setItem('currentUser', JSON.stringify(effectiveUser));
-          return { success: true, message: `Login sebagai ${substituteUser.name} (pengganti ${foundUser.name})` };
+    try {
+      console.log('Login attempt:', { username, password });
+      
+      let users = JSON.parse(localStorage.getItem('users') || '[]');
+      console.log('Available users:', users.map(u => u.username));
+      
+      let foundUser = users.find(u => u.username === username && u.password === password);
+      console.log('Found user:', foundUser ? foundUser.username : 'Not found');
+      
+      if (foundUser) {
+        if (foundUser.onLeave && foundUser.substitute) {
+          const substituteUser = users.find(u => u.id === foundUser.substitute);
+          if (substituteUser) {
+            const effectiveUser = { ...substituteUser, originalUser: foundUser.name, canInputIncoming: foundUser.canInputIncoming, canInputOutgoing: foundUser.canInputOutgoing };
+            setUser(effectiveUser);
+            localStorage.setItem('currentUser', JSON.stringify(effectiveUser));
+            return { success: true, message: `Login sebagai ${substituteUser.name} (pengganti ${foundUser.name})` };
+          }
         }
+        
+        const userToLogin = { ...foundUser };
+        delete userToLogin.password;
+        setUser(userToLogin);
+        localStorage.setItem('currentUser', JSON.stringify(userToLogin));
+        return { success: true, message: `Login berhasil sebagai ${foundUser.name}` };
       }
       
-      const userToLogin = { ...foundUser };
-      delete userToLogin.password;
-      setUser(userToLogin);
-      localStorage.setItem('currentUser', JSON.stringify(userToLogin));
-      return { success: true };
+      return { success: false, error: 'Username atau password salah. Coba username: kpa, sekretaris, superadmin' };
+    } catch (error) {
+      console.error('Login error:', error);
+      return { success: false, error: 'Terjadi kesalahan sistem. Silakan coba lagi.' };
     }
-    return { success: false, error: 'Username atau password salah' };
   };
 
   const logout = () => {

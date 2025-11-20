@@ -11,6 +11,19 @@ const LoginPage = () => {
   const { login } = useAuth();
   const { toast } = useToast();
 
+  const handleResetData = () => {
+    localStorage.removeItem('users');
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('incoming_mails');
+    localStorage.removeItem('outgoing_mails');
+    localStorage.removeItem('dispositions');
+    toast({
+      title: "Data Direset! 🔄",
+      description: "Data aplikasi telah direset. Silakan refresh halaman.",
+    });
+    setTimeout(() => window.location.reload(), 2000);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const result = login(username, password);
@@ -96,7 +109,18 @@ const LoginPage = () => {
 
           <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
             <p className="text-sm text-gray-600 mb-2 font-medium">Contoh Login (pass: password):</p>
-            <p className="text-xs text-gray-500">kpa, sekretaris, panitera, kasub_umum, panmud_gugatan, pelaksana_umum, superadmin</p>
+            <p className="text-xs text-gray-500">kpa, sekretaris, panitera, kasub_umum, panmud_gugatan, pelaksana_umum, superadmin (pass: admin)</p>
+          </div>
+
+          <div className="mt-4 text-center">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleResetData}
+              className="text-xs text-gray-500 hover:text-red-600"
+            >
+              Reset Data Aplikasi
+            </Button>
           </div>
         </div>
       </motion.div>
